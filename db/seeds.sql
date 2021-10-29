@@ -6,11 +6,23 @@ VALUES
 INSERT INTO role (title, salary, department_id)
 VALUES
   ('Tech Staff', 92.500, 1),
-  ('Tech Lead', 150.500, 1),
+  ('Tech Lead', 150.500, 2),
   ('Manager', 90.500, 2),
   ('CEO', 250.980, 2),
   ('Front Desk Intern', 36.667, 1);
 
+INSERT INTO managers (first_name, last_name, manager_id)
+VALUES
+  ('Ronald', 'Firbank', 4),
+  ('Virginia', 'Woolf', 5),
+  ('Piers', 'Gaveston', 5),
+  ('Charles', 'LeRoi', 7),
+  ('Katherine', 'Mansfield', 7),
+  ('Dora', 'Carrington', 7),
+  ('Edward', 'Bellamy', 7),
+  ('Montague', 'Summers', 6),
+  ('Octavia', 'Butler', 6),
+  ('Unica', 'Zurn', 4);
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
 VALUES
