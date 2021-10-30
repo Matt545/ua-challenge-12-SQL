@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const db = require('./db/connection');
 const cTable = require('console.table');
+const { query } = require('./db/connection');
 
 db.connect(err => {
     if (err) throw err;
@@ -9,6 +10,17 @@ db.connect(err => {
 });
 
 const startCLI = () => {
+    // db.query(
+    //     `SOURCE db/db.sql`,
+
+    //     function(err, results) {
+    //         if (err) {
+    //             console.log(err);
+    //         }
+    //         return 'built db!';
+    //     }
+    // );
+
 
 return inquirer
     .prompt([{
@@ -27,24 +39,120 @@ return inquirer
             default: 2
     }]).then(choice => {
         if (choice.homescreen === "View all Departments") {
-            console.log('1');
+            db.query(
+                `SELECT * FROM department;`,
+                function(err, results, fields) {
+                    console.table(results);
+                    startCLI();
+                }
+            );
         }
         if (choice.homescreen === "View all Roles") {
-            console.log('2');
+            db.query(
+                `SELECT role.id, role.title, role.salary, department.name AS 'department name'
+                FROM role
+                LEFT JOIN department ON role.department_id = department.id;`,
+                function(err, results, fields) {
+                    console.table(results);
+                }
+            );;
         }
         if (choice.homescreen === "View all Employees") {
             db.query(
-                `SELECT first_name, last_name FROM employee;`,
+                ` SELECT employee.id, employee.first_name, employee.last_name,
+                 role.title, department.name AS department, role.salary,
+                 concat(managers.first_name,' ', managers.last_name) AS manager
+                 FROM employee
+                 LEFT JOIN role ON employee.role_id = role.id
+                 LEFT JOIN department ON role.department_id = department.id
+                 LEFT JOIN managers ON employee.manager_id = managers.id;`,
                 function(err, results, fields) {
                     console.table(results);
                 }
             );
         }
         if (choice.homescreen === "Add a Department") {
-            console.log('4');
+            inquirer
+                .prompt([{
+                    type: 'input',
+                    name: 'name',
+                    message: 'What would you like to call the department?'
+                }]).then(input => {
+                    const depName = [input.name];
+                    db.query(
+                        `INSERT INTO department (name) VALUES (?)`, depName, (err, result) => {
+                            if (err) {
+                                console.log(err);
+                                return;
+                            }
+                            return 'SUCCESS';
+                        }
+                    )
+                })
         }
-        if (choice.homescreen === "Add a Roles") {
-            console.log('5');
+        if (choice.homescreen === "Add a Role") {
+            const question = db.query(
+                `SELECT * FROM department;`,
+                function(err, results, fields) {
+                    console.log(results);
+                    inquirer
+                .prompt([{
+                    type: 'input',
+                    name: 'title',
+                    message: 'What would you like to call this role?'
+                },{
+                    type: 'input',
+                    name: 'salary',
+                    message: 'What would the salary be?'
+                },{
+                    type: 'rawlist',
+                    name: 'department',
+                    message: 'Choose a department for this role.',
+                    choices: results,
+                    default: 3
+                }]).then(selection => {
+                    async function getID() {
+                        const mysql = require('mysql2/promise');
+                        const connection = await mysql.createConnection({host:'localhost', user: 'root', password: 'password', database: 'company'});
+                        
+                     const id = await connection.execute(`SELECT id FROM department
+                        WHERE name = ?`, [selection.department]);
+                        const newId = id[0];
+                        let result = newId.map(a => a.id);
+                        //console.log(result[0]);
+                        
+                        async function getnewRole() {
+                            const mysql = require('mysql2/promise');
+                            const connection = await mysql.createConnection({host:'localhost', user: 'root', password: 'password', database: 'company'});
+                            
+                            const [role] = await connection.execute(
+                            `INSERT INTO role (title, salary, department_id)
+                             VALUES (?,?,?)`,
+                            [selection.title, selection.salary, result[0]]);
+                            //console.log(role);
+                          };
+                        getnewRole();
+                      };
+                      getID();
+
+
+                    // db.query(`SELECT id FROM department
+                    // WHERE name = ?`, [selection.department], (err, result) => {
+                    //     if (err) {
+                    //         console.log(err);
+                    //     }
+                    //     console.log(result);
+                    // })
+                    // db.query(`INSERT INTO role (title, salary, department_id) VALUES (?,?,?)`,
+                    // [selection.title, selection.salary, result], (err, result) => {
+                    //     if (err) {
+                    //         console.log(err);
+                    //     }
+                    //     console.log(selection);
+                    // })
+                });
+                });
+            
         }
         if (choice.homescreen === "Add an Employee") {
             console.log('6');
