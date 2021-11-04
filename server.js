@@ -54,6 +54,7 @@ return inquirer
                 LEFT JOIN department ON role.department_id = department.id;`,
                 function(err, results, fields) {
                     console.table(results);
+                    startCLI();
                 }
             );;
         }
@@ -68,6 +69,7 @@ return inquirer
                  LEFT JOIN managers ON employee.manager_id = managers.id;`,
                 function(err, results, fields) {
                     console.table(results);
+                    startCLI();
                 }
             );
         }
@@ -85,7 +87,7 @@ return inquirer
                                 console.log(err);
                                 return;
                             }
-                            return 'SUCCESS';
+                            startCLI();
                         }
                     )
                 })
@@ -94,7 +96,7 @@ return inquirer
             const question = db.query(
                 `SELECT * FROM department;`,
                 function(err, results, fields) {
-                    console.log(results);
+                    //console.log(results);
                     inquirer
                 .prompt([{
                     type: 'input',
@@ -134,22 +136,7 @@ return inquirer
                         getnewRole();
                       };
                       getID();
-
-
-                    // db.query(`SELECT id FROM department
-                    // WHERE name = ?`, [selection.department], (err, result) => {
-                    //     if (err) {
-                    //         console.log(err);
-                    //     }
-                    //     console.log(result);
-                    // })
-                    // db.query(`INSERT INTO role (title, salary, department_id) VALUES (?,?,?)`,
-                    // [selection.title, selection.salary, result], (err, result) => {
-                    //     if (err) {
-                    //         console.log(err);
-                    //     }
-                    //     console.log(selection);
-                    // })
+                      startCLI();
                 });
                 });
             
